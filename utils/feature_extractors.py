@@ -28,10 +28,8 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
                 'next_words']
     # should we add is in quotation?
 
-    def __init__(self, phrases: List[Element], nodes: Dict[int, Element], phrase_id_by_node_id: Dict[int, int],
-                 context_words_count=10) -> None:
+    def __init__(self, phrases: List[Element], phrase_id_by_node_id: Dict[int, int], context_words_count=10) -> None:
         self.phrases = phrases
-        self.nodes = nodes
         self.phrase_id_by_node_id = phrase_id_by_node_id
         self.context_words_count = context_words_count
 
