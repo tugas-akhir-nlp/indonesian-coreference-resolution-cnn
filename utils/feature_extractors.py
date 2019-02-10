@@ -36,7 +36,6 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
     def get_entity_type(self, node: Element) -> str:
         if self.get_is_pronoun(node):
             return 'PERSON'
-
         return node.attrib['ne']
 
     def get_is_pronoun(self, node: Element) -> bool:
@@ -74,11 +73,11 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
             words = self.phrases[current_phrase_id].text.split()
 
             if len(words) <= words_left:
-                previous_words = ' '.join(words) + previous_words
+                previous_words = ' '.join(words) + ' ' + previous_words
                 words_left -= len(words)
                 current_phrase_id -= 1
             else:
-                previous_words = ' '.join(words[(-1*words_left):]) + previous_words
+                previous_words = ' '.join(words[(-1*words_left):]) + ' ' + previous_words
                 words_left = 0
 
         return previous_words
@@ -95,11 +94,11 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
             words = self.phrases[current_phrase_id].text.split()
 
             if len(words) <= words_left:
-                next_words = ' '.join(words) + ' ' + next_words
+                next_words = next_words + ' ' + ' '.join(words)
                 words_left -= len(words)
                 current_phrase_id += 1
             else:
-                next_words = ' '.join(words[:words_left]) + ' ' + next_words
+                next_words = next_words + ' ' + ' '.join(words[:words_left])
                 words_left = 0
 
         return next_words
