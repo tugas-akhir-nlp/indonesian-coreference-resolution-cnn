@@ -1,7 +1,9 @@
-from .stem import IndonesianStemmer
 from string import punctuation
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import numpy as np
+from .stem import IndonesianStemmer
+from .ufds import UFDS
+import xml.etree.ElementTree as ET
 
 stemmer = IndonesianStemmer()
 
@@ -72,3 +74,26 @@ def clean_sentence(sentence: str, word_vector: Dict[str, np.array]) -> str:
 
 def clean_arr(arr: List[str], word_vector: Dict[str, np.array]) -> List[str]:
     return [clean_word(word, word_vector) for word in arr if clean_word(word, word_vector) != '']
+
+
+def get_phrases_and_nodes(ufds: UFDS, root_element: ET.Element) \
+        -> Tuple[List[ET.Element], Dict[int, ET.Element], Dict[int,int]]:
+    # ret: phrases, nodes, phrase_id_by_node_id
+
+    phrases = []
+    nodes = {}
+    phrase_id_by_node_id = {}
+
+    for sentence in root_element:
+        for phrase in sentence:
+            phrases.append(phrase)
+
+            if 'id' in phrase.attrib:
+                ufds.init_id(int(phrase.attrib['id']))
+                nodes[int(phrase.attrib['id'])] = phrase
+                phrase_id_by_node_id[int(phrase.attrib['id'])] = len(phrases) - 1
+
+            if 'coref' in phrase.attrib:
+                ufds.gabung(int(phrase.attrib['id']), int(phrase.attrib['coref']))
+
+    return phrases, nodes, phrase_id_by_node_id

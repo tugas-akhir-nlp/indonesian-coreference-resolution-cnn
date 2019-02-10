@@ -31,9 +31,22 @@ class UFDS:
 
         return self.root(x) == self.root(y)
 
-    def get_chains(self) -> List[List[Hashable]]:
-        leluhur = [x for x in self.nodes if self.root(x) == x]
-        chains = [
-            [y for y in self.nodes if self.is_same(x, y)] for x in leluhur]
+    def get_chain_list(self) -> List[List[Hashable]]:
+        chain_parents = [x for x in self.nodes if self.root(x) == x]
 
-        return chains
+        chain_list = [
+            [y for y in self.nodes if self.is_same(x, y)]
+            for x in chain_parents
+        ]
+
+        return chain_list
+
+    def get_chain_dict(self) -> Dict[Hashable, List[Hashable]]:
+        chain_parents = [x for x in self.nodes if self.root(x) == x]
+
+        chain_dict = {
+            x: [y for y in self.nodes if self.is_same(x, y)]
+            for x in chain_parents
+        }
+
+        return chain_dict
