@@ -10,7 +10,7 @@ def is_number(word: str) -> bool:
     return word.replace(',', '.').replace('.', '').replace('-', '', 1).isdigit()
 
 
-def clean_word(word: str, word_vector: Dict[str, np.array]) -> str:
+def get_word(word: str) -> str:
     if '\\' in word:
         word = word.split('\\')[0]
 
@@ -21,6 +21,28 @@ def clean_word(word: str, word_vector: Dict[str, np.array]) -> str:
         word = word[1:]
 
     word = word.lower()
+
+    return word
+
+
+def get_words_only(text: str) -> str:
+    words = text.split()
+    words = map(get_word, words)
+    return ' '.join(words)
+
+
+def get_abbreviation(text: str) -> str:
+    words = get_words_only(text).split()
+    abb = ''
+
+    for word in words:
+        abb += word[0]
+
+    return abb
+
+
+def clean_word(word: str, word_vector: Dict[str, np.array]) -> str:
+    word = get_word(word)
 
     if word not in word_vector:
         tmp = word.split('-')
