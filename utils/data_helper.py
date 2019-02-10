@@ -1,6 +1,9 @@
 from string import punctuation
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Callable
 import numpy as np
+import pandas as pd
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.utils import to_categorical
 from .stem import IndonesianStemmer
 from .ufds import UFDS
 import xml.etree.ElementTree as ET
@@ -97,3 +100,59 @@ def get_phrases_and_nodes(ufds: UFDS, root_element: ET.Element) \
                 ufds.gabung(int(phrase.attrib['id']), int(phrase.attrib['coref']))
 
     return phrases, nodes, phrase_id_by_node_id
+
+
+def get_entity_types(labels: List[str]) -> List[str]:
+    entity_types = set()
+
+    for label in labels:
+        for entity_type in label.split('|'):
+            entity_types.add(entity_type)
+
+    return list(entity_types)
+
+
+def entity_to_bow(entities: List[str]) -> Callable[[str], List[int]]:
+    idx = {entities[i]: i for i in range(len(entities))}
+
+    def f(label: str) -> List[int]:
+        bow = [0 for _ in entities]
+
+        for entity_type in label.split('|'):
+            bow[idx[entity_type]] = 1
+
+        return bow
+
+    return f
+
+
+def entity_to_id(entities: List[str]) -> Callable[[str], int]:
+    idx = {entities[i]: i for i in range(len(entities))}
+
+    def f(label: str) -> int:
+        return idx[label]
+
+    return f
+
+
+def get_markable_dataframe(markable_file: str, tokenizer: Tokenizer, word_vector: Dict[str, np.array]) -> pd.DataFrame:
+    markables = pd.read_csv(markable_file)
+
+    markables.text = markables.text.map(lambda x: clean_sentence(str(x), word_vector))
+    markables.is_pronoun = markables.is_pronoun.map(int)
+    markables.entity_type = markables.entity_type.map(entity_to_bow(get_entity_types(markables.entity_type)))
+    markables.is_proper_name = markables.is_proper_name.map(int)
+    markables.is_first_person = markables.is_first_person.map(int)
+    markables.previous_words = markables.previous_words.map(lambda x: clean_sentence(str(x), word_vector))
+    markables.next_words = markables.next_words.map(lambda x: clean_sentence(str(x), word_vector))
+    markables.is_singleton = markables.is_singleton.map(lambda x: to_categorical(x, num_classes=2))
+
+    tokenizer.fit_on_texts(markables.text)
+    tokenizer.fit_on_texts(markables.previous_words)
+    tokenizer.fit_on_texts(markables.next_words)
+
+    markables.text = tokenizer.texts_to_sequences(markables.text)
+    markables.previous_words = tokenizer.texts_to_sequences(markables.previous_words)
+    markables.next_words = tokenizer.texts_to_sequences(markables.next_words)
+
+    return markables
