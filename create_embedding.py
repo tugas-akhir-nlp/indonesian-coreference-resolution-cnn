@@ -29,7 +29,7 @@ for sentence in root:
                     embedding[word] = word_vector.wv[word]
                 else:
                     embedding[word] = np.random.rand(
-                        300) * (max_val - min_val) + min_val
+                        vector_size) * (max_val - min_val) + min_val
 
                 embedding_file.write(
                     word + ' ' + ' '.join(map(str, embedding[word])) + '\n')
