@@ -1,4 +1,5 @@
 from tensorflow.python.keras.engine.training import Model
+from tensorflow.keras.layers import Concatenate, Dense
 from tensor_builders.deep import DeepTensorBuilder
 from tensor_builders.cnn import CNNTensorBuilder
 from typing import List
@@ -24,14 +25,50 @@ class SingletonClassifierModelBuilder:
         self.deep_tensor_builder = DeepTensorBuilder()
         self.cnn_tensor_builder = CNNTensorBuilder(
             input_length=10, vocab_size=len(embedding_matrix), vector_size=len(embedding_matrix[0]),
-            embedding_matrix=embedding_matrix, filter_sizes=[2, 3, 4], num_filters=64, trainable_embedding=True
+            embedding_matrix=embedding_matrix, filter_sizes=[2, 3, 4], num_filters=64, trainable_embedding=False,
+            output_size=16
         )
 
-    def create_model(self) -> Model:
+    def create_model(self, softmax: bool = True) -> Model:
         inputs = []
         tensors = []
 
         if self.use_words_feature:
             inp, tensor = self.cnn_tensor_builder.create_tensor()
             inputs.append(inp)
-            inputs.append(tensor)
+            tensors.append(tensor)
+
+        if self.use_context_feature:
+            inp, tensor = self.cnn_tensor_builder.create_tensor()
+            inputs.append(inp)
+            tensors.append(tensor)
+
+        if self.use_syntactic_feature:
+            inp, tensor = self.deep_tensor_builder.create_tensor(input_shape=(self.syntactic_features_num,),
+                                                                 layers=[32, 16],
+                                                                 dropout=0.2)
+            inputs.append(inp)
+            tensors.append(tensor)
+
+        if len(tensors) > 1:
+            tensor = Concatenate()(tensors)
+        elif len(tensors) == 1:
+            tensor = tensors[0]
+        else:
+            raise Exception('Should have features')
+
+        tensor = self.deep_tensor_builder.create_tensor(layers=[32, 8], dropout=0.2, input_tensor=tensor)
+
+        if softmax:
+            tensor = Dense(2, activation='softmax')(tensor)
+        else:
+            tensor = Dense(1, activation='sigmoid')(tensor)
+
+        model = Model(inputs=inputs, outputs=[tensor])
+
+        if softmax:
+            model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        else:
+            model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+        return model
