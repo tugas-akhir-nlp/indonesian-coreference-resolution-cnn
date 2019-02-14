@@ -1,15 +1,15 @@
 from tensorflow.python.framework.ops import Tensor
 from tensorflow.keras.layers import Input
+from typing import Tuple
 
 
 class BaseTensorBuilder:
     variables = []
 
-    def __init__(self, input_shape: tuple = None, input_only: bool = False) -> None:
+    def __init__(self, input_shape: tuple = None) -> None:
         self.input_shape = input_shape
-        self.input_only = input_only
 
-    def create_tensor(self, input_tensor: Tensor = None, **kwargs) -> Tensor:
+    def create_tensor(self, input_tensor: Tensor = None, input_only: bool = False, **kwargs) -> Tuple[Tensor, Tensor]:
         self.check_variables()
 
         temp = {}
@@ -19,15 +19,15 @@ class BaseTensorBuilder:
                 temp[variable] = getattr(self, variable)
                 setattr(self, variable, kwargs[variable])
 
-        tensor = self.create_input_tensor() if input_tensor is None else input_tensor
+        if input_tensor is None:
+            input_tensor = self.create_input_tensor()
 
-        if not self.input_only:
-            tensor = self.create_processing_tensor(tensor)
+        tensor = input_tensor if input_only else self.create_processing_tensor(input_tensor)
 
         for variable in temp.keys():
             setattr(self, variable, temp[variable])
 
-        return tensor
+        return input_tensor, tensor
 
     def check_variables(self) -> None:
         for variable in self.variables:
