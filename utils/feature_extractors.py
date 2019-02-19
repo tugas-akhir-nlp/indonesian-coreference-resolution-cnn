@@ -38,25 +38,25 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
             return 'PERSON'
         return node.attrib['ne']
 
-    def get_is_pronoun(self, node: Element) -> bool:
+    def get_is_pronoun(self, node: Element) -> int:
         pronouns = ['dia', 'ia', 'aku', 'saya', 'kamu', 'engkau', 'kau', 'anda', 'kami', 'kalian', 'kita', 'mereka',
                     'beliau']
 
         if '\\PRP' in node.text:
-            return True
+            return 1
 
         phrase = get_words_only(node.text)
 
-        return phrase in pronouns
+        return int(phrase in pronouns)
 
-    def get_is_proper_name(self, node: Element) -> bool:
-        return '\\NNP' in node.text
+    def get_is_proper_name(self, node: Element) -> int:
+        return int('\\NNP' in node.text)
 
-    def get_is_first_person(self, node: Element) -> bool:
+    def get_is_first_person(self, node: Element) -> int:
         first_persons = ['saya', 'aku']
         phrase = get_words_only(node.text)
 
-        return phrase in first_persons
+        return int(phrase in first_persons)
 
     def get_num_words(self, node: Element) -> int:
         return len(node.text.split())
@@ -114,47 +114,47 @@ class PairSyntacticFeatureExtractor(FeatureExtractor):
         self.phrases = phrases
         self.phrase_id_by_node_id = phrase_id_by_node_id
 
-    def get_is_exact_match(self, node1: Element, node2: Element) -> bool:
+    def get_is_exact_match(self, node1: Element, node2: Element) -> int:
         phrase1 = get_words_only(node1.text)
         phrase2 = get_words_only(node2.text)
 
-        return phrase1 == phrase2
+        return int(phrase1 == phrase2)
 
-    def get_is_words_match(self, node1: Element, node2: Element) -> bool:
+    def get_is_words_match(self, node1: Element, node2: Element) -> int:
         words1 = list(map(get_word, node1.text.split()))
         words2 = list(map(get_word, node2.text.split()))
 
         for word in words1:
             if word not in words2:
-                return False
+                return 0
 
         for word in words2:
             if word not in words1:
-                return False
+                return 0
 
-        return True
+        return 1
 
-    def get_is_substring(self, node1: Element, node2: Element) -> bool:
+    def get_is_substring(self, node1: Element, node2: Element) -> int:
         phrase1 = get_words_only(node1.text)
         phrase2 = get_words_only(node2.text)
 
-        return (phrase1 in phrase2) or (phrase2 in phrase1)
+        return int((phrase1 in phrase2) or (phrase2 in phrase1))
 
-    def get_is_abbreviation(self, node1: Element, node2: Element) -> bool:
-        return get_abbreviation(node1.text) == get_words_only(node2.text) or \
-               get_abbreviation(node2.text) == get_words_only(node1.text)
+    def get_is_abbreviation(self, node1: Element, node2: Element) -> int:
+        return int(get_abbreviation(node1.text) == get_words_only(node2.text) or \
+               get_abbreviation(node2.text) == get_words_only(node1.text))
 
-    def get_is_appositive(self, node1: Element, node2: Element) -> bool:
+    def get_is_appositive(self, node1: Element, node2: Element) -> int:
         first_node = node1 if int(node1.attrib['id']) < int(node2.attrib['id']) else node2
-        return self.get_is_nearest_candidate(node1, node2) and first_node.text.split('\\')[-2][-1] == ','
+        return int(self.get_is_nearest_candidate(node1, node2) and first_node.text.split('\\')[-2][-1] == ',')
 
-    def get_is_nearest_candidate(self, node1: Element, node2: Element) -> bool:
-        return abs(int(node2.attrib['id']) - int(node1.attrib['id'])) == 1
+    def get_is_nearest_candidate(self, node1: Element, node2: Element) -> int:
+        return int(abs(int(node2.attrib['id']) - int(node1.attrib['id'])) == 1)
     
-    def get_sentence_distance(self, node1: Element, node2: Element) -> bool:
+    def get_sentence_distance(self, node1: Element, node2: Element) -> int:
         return abs(int(self.parent_map[node1].attrib['id']) - int(self.parent_map[node2].attrib['id']))
 
-    def get_word_distance(self, node1: Element, node2: Element) -> bool:
+    def get_word_distance(self, node1: Element, node2: Element) -> int:
         phrase_id_1 = self.phrase_id_by_node_id[int(node1.attrib['id'])]
         phrase_id_2 = self.phrase_id_by_node_id[int(node2.attrib['id'])]
 
@@ -164,5 +164,5 @@ class PairSyntacticFeatureExtractor(FeatureExtractor):
 
         return dist
 
-    def get_markable_distance(self, node1: Element, node2: Element) -> bool:
+    def get_markable_distance(self, node1: Element, node2: Element) -> int:
         return abs(int(node1.attrib['id']) - int(node2.attrib['id']))

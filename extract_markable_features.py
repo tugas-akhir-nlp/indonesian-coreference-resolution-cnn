@@ -7,9 +7,9 @@ from typing import Hashable, Dict, List
 import logging
 
 
-def is_singleton(ufds: UFDS, chain_dict: Dict[Hashable, list], node: Hashable) -> bool:
+def is_singleton(ufds: UFDS, chain_dict: Dict[Hashable, list], node: Hashable) -> int:
     par = ufds.root(node)
-    return len(chain_dict[par]) == 1
+    return int(len(chain_dict[par]) == 1)
 
 
 def save_markable_features(markables: List[dict], output_file: str) -> None:
