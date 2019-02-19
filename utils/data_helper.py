@@ -135,24 +135,53 @@ def entity_to_id(entities: List[str]) -> Callable[[str], int]:
     return f
 
 
-def get_markable_dataframe(markable_file: str, tokenizer: Tokenizer, word_vector: Dict[str, np.array]) -> pd.DataFrame:
+def to_sequence(text: str, idx_by_word: Dict[str, int]) -> List[int]:
+    text = text.split()
+    return list(map(lambda word: idx_by_word[word], text))
+
+
+def get_markable_dataframe(markable_file: str, word_vector: Dict[str, np.array],
+                           idx_by_word: Dict[str, int]) -> pd.DataFrame:
     markables = pd.read_csv(markable_file)
 
-    markables.text = markables.text.map(lambda x: clean_sentence(str(x), word_vector))
+    markables.text = markables.text.fillna("").map(lambda x: to_sequence(clean_sentence(str(x), word_vector),
+                                                                         idx_by_word))
     markables.is_pronoun = markables.is_pronoun.map(int)
     markables.entity_type = markables.entity_type.map(entity_to_bow(get_entity_types(markables.entity_type)))
     markables.is_proper_name = markables.is_proper_name.map(int)
     markables.is_first_person = markables.is_first_person.map(int)
-    markables.previous_words = markables.previous_words.map(lambda x: clean_sentence(str(x), word_vector))
-    markables.next_words = markables.next_words.map(lambda x: clean_sentence(str(x), word_vector))
+    markables.previous_words = markables.previous_words.fillna("").map(
+        lambda x: to_sequence(clean_sentence(str(x), word_vector), idx_by_word)
+    )
+    markables.next_words = markables.next_words.fillna("").map(
+        lambda x: to_sequence(clean_sentence(str(x), word_vector), idx_by_word)
+    )
     markables.is_singleton = markables.is_singleton.map(lambda x: to_categorical(x, num_classes=2))
 
-    tokenizer.fit_on_texts(markables.text)
-    tokenizer.fit_on_texts(markables.previous_words)
-    tokenizer.fit_on_texts(markables.next_words)
-
-    markables.text = tokenizer.texts_to_sequences(markables.text)
-    markables.previous_words = tokenizer.texts_to_sequences(markables.previous_words)
-    markables.next_words = tokenizer.texts_to_sequences(markables.next_words)
-
     return markables
+
+
+def get_embedding_variables(embedding_indexes_file_path: str,
+                            indexed_embedding_file_path: str) \
+        -> Tuple[Dict[str, np.ndarray], List[np.ndarray], Dict[str, int], Dict[int, str]]:
+
+    word_vector = {}
+    embedding_matrix = []
+    idx_by_word = {}
+    word_by_idx = {}
+
+    for element in open(embedding_indexes_file_path, 'r').readlines():
+        element = element.split()
+        word, index = element[0], int(element[1])
+        idx_by_word[word] = index
+        word_by_idx[index] = word
+
+    for element in open(indexed_embedding_file_path, 'r').readlines():
+        element = element.split()
+        index = len(embedding_matrix)
+
+        embedding = np.asarray(element, dtype='float64')
+        word_vector[word_by_idx[index]] = embedding
+        embedding_matrix.append(embedding)
+
+    return word_vector, embedding_matrix, idx_by_word, word_by_idx
