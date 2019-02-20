@@ -3,5 +3,6 @@
 helper_files/word2vec/id.bin filter=lfs diff=lfs merge=lfs -text
 helper_files/generated_embedding.txt filter=lfs diff=lfs merge=lfs -text
 helper_files/embedding/** filter=lfs diff=lfs merge=lfs -text
+models/** filter=lfs diff=lfs merge=lfs -text
 data/** filter=lfs diff=lfs merge=lfs -text
 helper_files/word2vec/x.bin filter=lfs diff=lfs merge=lfs -text
