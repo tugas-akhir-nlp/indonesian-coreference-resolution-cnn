@@ -23,11 +23,13 @@ class SingletonClassifierModelBuilder:
             raise Exception('Insert embedding matrix')
 
         self.deep_tensor_builder = DeepTensorBuilder()
-        self.cnn_tensor_builder = CNNTensorBuilder(
-            input_length=10, vocab_size=len(embedding_matrix), vector_size=len(embedding_matrix[0]),
-            embedding_matrix=embedding_matrix, filter_sizes=[2, 3, 4], num_filters=64, trainable_embedding=False,
-            output_size=16
-        )
+
+        if self.use_words_feature or self.use_context_feature:
+            self.cnn_tensor_builder = CNNTensorBuilder(
+                input_length=10, vocab_size=len(embedding_matrix), vector_size=len(embedding_matrix[0]),
+                embedding_matrix=embedding_matrix, filter_sizes=[2, 3, 4], num_filters=64, trainable_embedding=False,
+                output_size=16
+            )
 
     def create_model(self, softmax: bool = True) -> Model:
         inputs = []
@@ -39,9 +41,11 @@ class SingletonClassifierModelBuilder:
             tensors.append(tensor)
 
         if self.use_context_feature:
-            inp, tensor = self.cnn_tensor_builder.create_tensor()
-            inputs.append(inp)
-            tensors.append(tensor)
+            inp_prev, tensor_prev = self.cnn_tensor_builder.create_tensor()
+            inp_next, tensor_next = self.cnn_tensor_builder.create_tensor()
+
+            inputs.extend([inp_prev, inp_next])
+            tensors.extend([tensor_prev, tensor_next])
 
         if self.use_syntactic_feature:
             inp, tensor = self.deep_tensor_builder.create_tensor(input_shape=(self.syntactic_features_num,),

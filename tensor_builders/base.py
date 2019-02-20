@@ -12,7 +12,7 @@ class BaseTensorBuilder:
     def create_tensor(self, input_tensor: Tensor = None, input_only: bool = False, **kwargs) -> Tuple[Tensor, Tensor]:
         temp = {}
 
-        for variable in self.variables:
+        for variable in self.variables + ['input_shape']:
             if variable in kwargs:
                 temp[variable] = getattr(self, variable)
                 setattr(self, variable, kwargs[variable])
