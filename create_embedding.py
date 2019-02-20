@@ -24,7 +24,7 @@ embedding = {}
 root = data.getroot()
 
 
-idx = 0
+idx = 1
 for sentence in root:
     for phrase in sentence:
         cleaned_phrase = clean_sentence(phrase.text, word_vector.wv)
