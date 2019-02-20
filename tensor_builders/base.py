@@ -10,14 +10,14 @@ class BaseTensorBuilder:
         self.input_shape = input_shape
 
     def create_tensor(self, input_tensor: Tensor = None, input_only: bool = False, **kwargs) -> Tuple[Tensor, Tensor]:
-        self.check_variables()
-
         temp = {}
 
         for variable in self.variables:
             if variable in kwargs:
                 temp[variable] = getattr(self, variable)
                 setattr(self, variable, kwargs[variable])
+
+        self.check_variables()
 
         if input_tensor is None:
             input_tensor = self.create_input_tensor()
