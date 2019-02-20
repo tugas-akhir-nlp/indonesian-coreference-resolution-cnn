@@ -57,7 +57,7 @@ class SingletonClassifierModelBuilder:
         else:
             raise Exception('Should have features')
 
-        tensor = self.deep_tensor_builder.create_tensor(layers=[32, 8], dropout=0.2, input_tensor=tensor)
+        _, tensor = self.deep_tensor_builder.create_tensor(layers=[32, 8], dropout=0.2, input_tensor=tensor)
 
         if softmax:
             tensor = Dense(2, activation='softmax')(tensor)
