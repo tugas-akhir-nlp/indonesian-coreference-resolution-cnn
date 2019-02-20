@@ -163,7 +163,7 @@ def get_markable_dataframe(markable_file: str, word_vector: Dict[str, np.array],
 
 def get_embedding_variables(embedding_indexes_file_path: str,
                             indexed_embedding_file_path: str) \
-        -> Tuple[Dict[str, np.ndarray], List[np.ndarray], Dict[str, int], Dict[int, str]]:
+        -> Tuple[Dict[str, np.ndarray], np.ndarray, Dict[str, int], Dict[int, str]]:
 
     word_vector = {}
     embedding_matrix = []
@@ -178,10 +178,17 @@ def get_embedding_variables(embedding_indexes_file_path: str,
 
     for element in open(indexed_embedding_file_path, 'r').readlines():
         element = element.split()
-        index = len(embedding_matrix)
 
         embedding = np.asarray(element, dtype='float64')
+
+        if len(embedding_matrix) == 0:
+            embedding_matrix.append(np.zeros(embedding.shape))
+
+        index = len(embedding_matrix)
         word_vector[word_by_idx[index]] = embedding
+
         embedding_matrix.append(embedding)
+
+    embedding_matrix = np.array(embedding_matrix)
 
     return word_vector, embedding_matrix, idx_by_word, word_by_idx
