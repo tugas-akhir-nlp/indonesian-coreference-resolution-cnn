@@ -1,12 +1,13 @@
-from xml.etree.ElementTree import Element
-from .data_helper import get_words_only, get_word, get_abbreviation
 from typing import List, Dict
+from xml.etree.ElementTree import Element
+
+from .data_helper import get_words_only, get_word, get_abbreviation
 
 
 class FeatureExtractor:
     features = []
 
-    def get_features(self, *args, **kwargs)-> dict:
+    def get_features(self, *args, **kwargs) -> dict:
         features = {}
 
         for feature in self.features:
@@ -26,6 +27,7 @@ class FeatureExtractor:
 class SingleSyntacticFeatureExtractor(FeatureExtractor):
     features = ['is_pronoun', 'entity_type', 'is_proper_name', 'is_first_person', 'num_words', 'previous_words',
                 'next_words']
+
     # should we add is in quotation?
 
     def __init__(self, phrases: List[Element], phrase_id_by_node_id: Dict[int, int], context_words_count=10) -> None:
@@ -77,7 +79,7 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
                 words_left -= len(words)
                 current_phrase_id -= 1
             else:
-                previous_words = ' '.join(words[(-1*words_left):]) + ' ' + previous_words
+                previous_words = ' '.join(words[(-1 * words_left):]) + ' ' + previous_words
                 words_left = 0
 
         return previous_words
@@ -142,7 +144,7 @@ class PairSyntacticFeatureExtractor(FeatureExtractor):
 
     def get_is_abbreviation(self, node1: Element, node2: Element) -> int:
         return int(get_abbreviation(node1.text) == get_words_only(node2.text) or \
-               get_abbreviation(node2.text) == get_words_only(node1.text))
+                   get_abbreviation(node2.text) == get_words_only(node1.text))
 
     def get_is_appositive(self, node1: Element, node2: Element) -> int:
         first_node = node1 if int(node1.attrib['id']) < int(node2.attrib['id']) else node2
@@ -150,7 +152,7 @@ class PairSyntacticFeatureExtractor(FeatureExtractor):
 
     def get_is_nearest_candidate(self, node1: Element, node2: Element) -> int:
         return int(abs(int(node2.attrib['id']) - int(node1.attrib['id'])) == 1)
-    
+
     def get_sentence_distance(self, node1: Element, node2: Element) -> int:
         return abs(int(self.parent_map[node1].attrib['id']) - int(self.parent_map[node2].attrib['id']))
 
@@ -160,7 +162,7 @@ class PairSyntacticFeatureExtractor(FeatureExtractor):
 
         dist = 0
         for phrase_id in range(min(phrase_id_1, phrase_id_2) + 1, max(phrase_id_1, phrase_id_2)):
-            dist += self.phrases[phrase_id]
+            dist += len(self.phrases[phrase_id].text.split())
 
         return dist
 

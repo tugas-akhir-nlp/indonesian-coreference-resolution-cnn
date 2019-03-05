@@ -17,7 +17,9 @@ class BudiInstancesGenerator(TrainingInstancesGenerator):
 
         for a in range(len(training_ids)):
             for b in range(a + 1, len(training_ids)):
-                instances.append((a, b, int(ufds.is_same(a, b))))
+                instances.append(
+                    (training_ids[a], training_ids[b], int(ufds.is_same(training_ids[a], training_ids[b])))
+                )
 
         return instances
 
@@ -27,6 +29,7 @@ class SoonInstancesGenerator(TrainingInstancesGenerator):
         instances = []
 
         chains = ufds.get_chain_list()
+
         for chain in chains:
             for i in range(len(chain) - 1):
                 instances.append((chain[i], chain[i + 1], 1))
@@ -45,6 +48,7 @@ class GilangInstancesGenerator(TrainingInstancesGenerator):
         instances = []
 
         chains = ufds.get_chain_list()
+        
         for chain in chains:
             for i in range(len(chain) - 1):
                 instances.append((chain[i], chain[i + 1], 1))
