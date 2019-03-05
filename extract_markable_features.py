@@ -1,13 +1,14 @@
-from utils.feature_extractors import SingleSyntacticFeatureExtractor
 import csv
-from xml.etree import ElementTree
-from utils.ufds import UFDS
-from utils.data_helper import get_phrases_and_nodes
-from typing import Hashable, Dict, List
 import logging
+from typing import Dict, List
+from xml.etree import ElementTree
+
+from utils.data_helper import get_phrases_and_nodes
+from utils.feature_extractors import SingleSyntacticFeatureExtractor
+from utils.ufds import UFDS
 
 
-def is_singleton(ufds: UFDS, chain_dict: Dict[Hashable, list], node: Hashable) -> int:
+def is_singleton(ufds: UFDS, chain_dict: Dict[int, List[int]], node: int) -> int:
     par = ufds.root(node)
     return int(len(chain_dict[par]) == 1)
 

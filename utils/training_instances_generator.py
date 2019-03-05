@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Hashable
+from typing import List, Tuple
 
 from .search import strict_binary_search
 from .ufds import UFDS
@@ -7,12 +7,12 @@ from .ufds import UFDS
 
 class TrainingInstancesGenerator(ABC):
     @abstractmethod
-    def generate(self, training_ids: List[Hashable], ufds: UFDS) -> List[Tuple[Hashable, Hashable, int]]:
+    def generate(self, training_ids: List[int], ufds: UFDS) -> List[Tuple[int, int, int]]:
         pass
 
 
 class BudiInstancesGenerator(TrainingInstancesGenerator):
-    def generate(self, training_ids: List[Hashable], ufds: UFDS) -> List[Tuple[Hashable, Hashable, int]]:
+    def generate(self, training_ids: List[int], ufds: UFDS) -> List[Tuple[int, int, int]]:
         instances = []
 
         for a in range(len(training_ids)):
@@ -23,7 +23,7 @@ class BudiInstancesGenerator(TrainingInstancesGenerator):
 
 
 class SoonInstancesGenerator(TrainingInstancesGenerator):
-    def generate(self, training_ids: List[Hashable], ufds: UFDS) -> List[Tuple[Hashable, Hashable, int]]:
+    def generate(self, training_ids: List[int], ufds: UFDS) -> List[Tuple[int, int, int]]:
         instances = []
 
         chains = ufds.get_chain_list()
@@ -41,7 +41,7 @@ class SoonInstancesGenerator(TrainingInstancesGenerator):
 
 
 class GilangInstancesGenerator(TrainingInstancesGenerator):
-    def generate(self, training_ids: List[Hashable], ufds: UFDS) -> List[Tuple[Hashable, Hashable, int]]:
+    def generate(self, training_ids: List[int], ufds: UFDS) -> List[Tuple[int, int, int]]:
         instances = []
 
         chains = ufds.get_chain_list()

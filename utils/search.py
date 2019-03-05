@@ -1,7 +1,7 @@
-from typing import List, Hashable
+from typing import List
 
 
-def strict_binary_search(lst: List[Hashable], val: Hashable) -> int:
+def strict_binary_search(lst: List[int], val: int) -> int:
     """
     Strict binary search, val should be exist in lst
     Return the index of val in lst

@@ -1,9 +1,11 @@
-from tensorflow.python.framework.ops import Tensor
-from tensorflow.keras.layers import Input
+from abc import ABC, abstractmethod
 from typing import Tuple
 
+from tensorflow.keras.layers import Input
+from tensorflow.python.framework.ops import Tensor
 
-class BaseTensorBuilder:
+
+class BaseTensorBuilder(ABC):
     variables = []
 
     def __init__(self, input_shape: tuple = None) -> None:
@@ -40,5 +42,6 @@ class BaseTensorBuilder:
 
         return Input(self.input_shape)
 
+    @abstractmethod
     def create_processing_tensor(self, input_tensor: Tensor) -> Tensor:
-        raise NotImplementedError()
+        pass
