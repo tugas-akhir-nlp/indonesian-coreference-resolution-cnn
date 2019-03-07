@@ -1,6 +1,8 @@
 from typing import List
-from tensorflow.python.framework.ops import Tensor
+
 from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.python.framework.ops import Tensor
+
 from .base import BaseTensorBuilder
 
 
