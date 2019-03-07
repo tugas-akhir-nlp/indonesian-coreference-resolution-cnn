@@ -25,7 +25,7 @@ class FeatureExtractor:
 
 
 class SingleSyntacticFeatureExtractor(FeatureExtractor):
-    features = ['is_pronoun', 'entity_type', 'is_proper_name', 'is_first_person', 'num_words', 'previous_words',
+    features = ['is_pronoun', 'entity_type', 'is_proper_name', 'is_first_person', 'previous_words',
                 'next_words']
 
     # should we add is in quotation?

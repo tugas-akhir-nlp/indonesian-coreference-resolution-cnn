@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
-from .search import strict_binary_search
-from .ufds import UFDS
+from utils.search import strict_binary_search
+from utils.ufds import UFDS
 
 
 class TrainingInstancesGenerator(ABC):
@@ -48,7 +48,7 @@ class GilangInstancesGenerator(TrainingInstancesGenerator):
         instances = []
 
         chains = ufds.get_chain_list()
-        
+
         for chain in chains:
             for i in range(len(chain) - 1):
                 instances.append((chain[i], chain[i + 1], 1))
