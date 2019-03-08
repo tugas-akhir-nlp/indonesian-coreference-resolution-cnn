@@ -79,16 +79,11 @@ class CoreferenceClassifierModelBuilder:
             tensors.append(tensor)
 
         if self.use_relation_feature:
-            inp_m1, tensor_m1 = self.deep_tensor_builder.create_tensor(input_shape=(self.relation_features_num,),
-                                                                       layers=[32, 16],
-                                                                       dropout=0.2)
-            inp_m2, tensor_m2 = self.deep_tensor_builder.create_tensor(input_shape=(self.relation_features_num,),
-                                                                       layers=[32, 16],
-                                                                       dropout=0.2)
+            inp, tensor = self.deep_tensor_builder.create_tensor(input_shape=(self.relation_features_num,),
+                                                                 layers=[32, 16],
+                                                                 dropout=0.2)
 
-            tensor = self._join_individual_tensor(tensor_m1, tensor_m2)
-
-            inputs.extend([inp_m1, inp_m2])
+            inputs.append(inp)
             tensors.append(tensor)
 
         if len(tensors) > 1:
