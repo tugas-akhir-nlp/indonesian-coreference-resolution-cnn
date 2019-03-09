@@ -78,3 +78,29 @@ class MUCScorer(Scorer):
             denominator += ki - 1
 
         return nominator / denominator
+
+
+class B3Scorer(Scorer):
+    def compute_precision(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
+        return self._general_compute(predicted_chains, label_chains)
+
+    def compute_recall(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
+        return self._general_compute(label_chains, predicted_chains)
+
+    def _general_compute(self, chain1: List[List[int]], chain2: List[List[int]]) -> float:
+        nominator = 0
+        denominator = 0
+
+        for c1 in chain1:
+            for c2 in chain2:
+                nb_intersect = 0
+
+                for markable in c2:
+                    if markable in c1:
+                        nb_intersect += 1
+
+                nominator += (nb_intersect ** 2) / len(c1)
+
+            denominator += len(c2)
+
+        return nominator / denominator
