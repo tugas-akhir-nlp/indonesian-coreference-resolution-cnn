@@ -47,3 +47,13 @@ class BestFirstClusterer(Clusterer):
 
         best_anaphora = reduce(lambda x, y: x if x[1] > y[1] else y, anaphora_scores, (-1, -1))
         return [best_anaphora[0]]
+
+
+class ClosestFirstClusterer(Clusterer):
+    def _choose_pairs(self, m1_id: int, anaphora_scores: List[Tuple[int, float]]) -> List[int]:
+        if len(anaphora_scores) == 0:
+            return []
+
+        anaphora_distance = map(lambda x: (x[0], abs(x[0] - m1_id)), anaphora_scores)
+        closest_anaphora = reduce(lambda x, y: x if x[1] < y[1] else y, anaphora_distance, (-1, 999999))
+        return [closest_anaphora[0]]
