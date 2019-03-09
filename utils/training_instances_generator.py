@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
+from utils.data_structures import UFDS
 from utils.search import strict_binary_search
-from utils.ufds import UFDS
 
 
 class TrainingInstancesGenerator(ABC):

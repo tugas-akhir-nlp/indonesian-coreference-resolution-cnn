@@ -21,7 +21,7 @@ class UFDS:
             self.parent[x] = self.root(self.parent[x])
             return self.parent[x]
 
-    def gabung(self, x: int, y: int) -> None:
+    def join(self, x: int, y: int) -> None:
         self.init_id(x, y)
 
         self.parent[self.root(x)] = self.root(y)

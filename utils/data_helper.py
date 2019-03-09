@@ -1,12 +1,13 @@
+import xml.etree.ElementTree as ET
 from string import punctuation
 from typing import Dict, List, Tuple, Callable
+
 import numpy as np
 import pandas as pd
-from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.utils import to_categorical
+
+from .data_structures import UFDS
 from .stem import IndonesianStemmer
-from .ufds import UFDS
-import xml.etree.ElementTree as ET
 
 stemmer = IndonesianStemmer()
 
@@ -80,7 +81,7 @@ def clean_arr(arr: List[str], word_vector: Dict[str, np.array]) -> List[str]:
 
 
 def get_phrases_and_nodes(ufds: UFDS, root_element: ET.Element) \
-        -> Tuple[List[ET.Element], Dict[int, ET.Element], Dict[int,int]]:
+        -> Tuple[List[ET.Element], Dict[int, ET.Element], Dict[int, int]]:
     # ret: phrases, nodes, phrase_id_by_node_id
 
     phrases = []
@@ -97,7 +98,7 @@ def get_phrases_and_nodes(ufds: UFDS, root_element: ET.Element) \
                 phrase_id_by_node_id[int(phrase.attrib['id'])] = len(phrases) - 1
 
             if 'coref' in phrase.attrib:
-                ufds.gabung(int(phrase.attrib['id']), int(phrase.attrib['coref']))
+                ufds.join(int(phrase.attrib['id']), int(phrase.attrib['coref']))
 
     return phrases, nodes, phrase_id_by_node_id
 
@@ -164,7 +165,6 @@ def get_markable_dataframe(markable_file: str, word_vector: Dict[str, np.array],
 def get_embedding_variables(embedding_indexes_file_path: str,
                             indexed_embedding_file_path: str) \
         -> Tuple[Dict[str, np.ndarray], np.ndarray, Dict[str, int], Dict[int, str]]:
-
     word_vector = {}
     embedding_matrix = []
     idx_by_word = {}

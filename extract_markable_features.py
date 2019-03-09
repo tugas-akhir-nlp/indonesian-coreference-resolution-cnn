@@ -4,8 +4,8 @@ from typing import Dict, List
 from xml.etree import ElementTree
 
 from utils.data_helper import get_phrases_and_nodes
+from utils.data_structures import UFDS
 from utils.feature_extractors import SingleSyntacticFeatureExtractor
-from utils.ufds import UFDS
 
 
 def is_singleton(ufds: UFDS, chain_dict: Dict[int, List[int]], node: int) -> int:

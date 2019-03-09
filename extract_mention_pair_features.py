@@ -4,10 +4,10 @@ from typing import List
 from xml.etree import ElementTree
 
 from utils.data_helper import get_phrases_and_nodes
+from utils.data_structures import UFDS
 from utils.feature_extractors import PairSyntacticFeatureExtractor
 from utils.training_instances_generator import TrainingInstancesGenerator, BudiInstancesGenerator, \
     SoonInstancesGenerator, GilangInstancesGenerator
-from utils.ufds import UFDS
 
 
 def save_mention_pair_features(mention_pairs: List[dict], output_file: str) -> None:
