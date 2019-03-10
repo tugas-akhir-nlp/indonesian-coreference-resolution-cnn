@@ -1,21 +1,25 @@
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import List, Tuple, Dict, Iterable
+from typing import List, Tuple, Dict, Iterable, Set
 
 import numpy as np
 
 from utils.data_structures import UFDS
 
 
-def get_anaphora_scores_by_antecedent(m1_ids: Iterable[int], m2_ids: Iterable[int], scores: np.ndarray) -> \
-        Dict[int, List[Tuple[int, float]]]:
+def get_anaphora_scores_by_antecedent(m1_ids: Iterable[int], m2_ids: Iterable[int], scores: np.ndarray,
+                                      singletons: Set[int] = None) -> Dict[int, List[Tuple[int, float]]]:
+    if singletons is None:
+        singletons = set()
+
     anaphora_scores_by_antecedent = {}
 
     for m1_id, m2_id, score in zip(m1_ids, m2_ids, scores):
         if m1_id not in anaphora_scores_by_antecedent:
             anaphora_scores_by_antecedent[m1_id] = []
 
-        anaphora_scores_by_antecedent[m1_id].append((m2_id, score))
+        if m1_id not in singletons and m2_id not in singletons:
+            anaphora_scores_by_antecedent[m1_id].append((m2_id, score))
 
     return anaphora_scores_by_antecedent
 
@@ -27,7 +31,7 @@ class Clusterer(ABC):
 
         for m1_id, m2_ids in anaphora_scores_by_antecedent.items():
             ufds.init_id(m1_id)
-            passed_anaphora = list(filter(lambda x: x[1] > threshold, m2_ids))
+            passed_anaphora = list(filter(lambda x: x[1][1] > threshold, m2_ids))
             choosed_pairs = self._choose_pairs(m1_id, passed_anaphora)
 
             for choosed_pair in choosed_pairs:
@@ -45,7 +49,7 @@ class BestFirstClusterer(Clusterer):
         if len(anaphora_scores) == 0:
             return []
 
-        best_anaphora = reduce(lambda x, y: x if x[1] > y[1] else y, anaphora_scores, (-1, -1))
+        best_anaphora = reduce(lambda x, y: x if x[1][1] > y[1][1] else y, anaphora_scores, (-1, [-1, -1]))
         return [best_anaphora[0]]
 
 
