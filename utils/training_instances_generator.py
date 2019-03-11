@@ -46,6 +46,7 @@ class SoonInstancesGenerator(TrainingInstancesGenerator):
 class GilangInstancesGenerator(TrainingInstancesGenerator):
     def generate(self, training_ids: List[int], ufds: UFDS) -> List[Tuple[int, int, int]]:
         instances = []
+        added_pair = set()
 
         chains = ufds.get_chain_list()
 
@@ -57,7 +58,9 @@ class GilangInstancesGenerator(TrainingInstancesGenerator):
                 anaphora_idx = strict_binary_search(training_ids, chain[i + 1])
 
                 for j in range(antecedent_idx + 1, anaphora_idx):
-                    instances.append((chain[i], training_ids[j], 0))
-                    instances.append((training_ids[j], chain[i + 1], 0))
+                    for k in range(j + 1, anaphora_idx):
+                        if not ufds.is_same(j, k) and not (j, k) in added_pair:
+                            instances.append((training_ids[j], training_ids[k], 0))
+                            added_pair.add((j, k))
 
         return instances
