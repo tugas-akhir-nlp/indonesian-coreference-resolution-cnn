@@ -57,8 +57,8 @@ class GilangInstancesGenerator(TrainingInstancesGenerator):
                 antecedent_idx = strict_binary_search(training_ids, chain[i])
                 anaphora_idx = strict_binary_search(training_ids, chain[i + 1])
 
-                for j in range(antecedent_idx + 1, anaphora_idx):
-                    for k in range(j + 1, anaphora_idx):
+                for j in range(antecedent_idx, anaphora_idx + 1):
+                    for k in range(j + 1, anaphora_idx + 1):
                         if not ufds.is_same(j, k) and not (j, k) in added_pair:
                             instances.append((training_ids[j], training_ids[k], 0))
                             added_pair.add((j, k))

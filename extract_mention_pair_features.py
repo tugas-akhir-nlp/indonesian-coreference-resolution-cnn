@@ -36,7 +36,7 @@ def extract_mention_pair_features(input_file: str, instances_generator: Training
     )
 
     logging.info('Generating training instances')
-    training_node_ids = list(ufds.nodes)
+    training_node_ids = sorted(list(ufds.nodes))
     training_instances = instances_generator.generate(training_node_ids, ufds)
 
     logging.info('Extracting mention pairs features')
