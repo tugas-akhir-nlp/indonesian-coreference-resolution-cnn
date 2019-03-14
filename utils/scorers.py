@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
+from collections import Counter
 
 
 class Scorer(ABC):
@@ -88,19 +89,28 @@ class B3Scorer(Scorer):
         return self._general_compute(label_chains, predicted_chains)
 
     def _general_compute(self, chain1: List[List[int]], chain2: List[List[int]]) -> float:
-        nominator = 0
-        denominator = 0
+        mention_to_gold = {}
+        
+        for c in chain2:
+            for m in c:
+                mention_to_gold[m] = c
+                
+        num, dem = 0, 0
 
-        for c1 in chain1:
-            for c2 in chain2:
-                nb_intersect = 0
+        for c in chain1:
+            if len(c) == 1:
+                continue
 
-                for markable in c2:
-                    if markable in c1:
-                        nb_intersect += 1
+            gold_counts = Counter()
+            correct = 0
+            for m in c:
+                if m in mention_to_gold:
+                    gold_counts[tuple(mention_to_gold[m])] += 1
+            for c2, count in gold_counts.items():
+                if len(c2) != 1:
+                    correct += count * count
 
-                nominator += (nb_intersect ** 2) / len(c1)
+            num += correct / float(len(c))
+            dem += len(c)
 
-            denominator += len(c2)
-
-        return nominator / denominator
+        return num / dem
