@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from csv import DictReader
 from string import punctuation
 from typing import Dict, List, Tuple, Callable
 
@@ -192,3 +193,52 @@ def get_embedding_variables(embedding_indexes_file_path: str,
     embedding_matrix = np.array(embedding_matrix)
 
     return word_vector, embedding_matrix, idx_by_word, word_by_idx
+
+
+def get_sentence_variables(data_file_path: str) -> Tuple[Dict[int, int], Dict[int, List[int]]]:
+    data = ET.parse(data_file_path)
+    root = data.getroot()
+    
+    sentence_id_by_markable_id = {}
+    markable_ids_by_sentence_id = {}
+
+    for sentence in root:
+        markable_ids_by_sentence_id[int(sentence.attrib['id'])] = []
+
+        for phrase in sentence:
+            if 'id' in phrase.attrib:
+                sentence_id_by_markable_id[int(phrase.attrib['id'])] = int(sentence.attrib['id'])
+                markable_ids_by_sentence_id[int(sentence.attrib['id'])].append(int(phrase.attrib['id']))
+
+    return sentence_id_by_markable_id, markable_ids_by_sentence_id
+
+
+def get_document_id_variables(document_id_file_path: str, markable_ids_by_sentence_id: Dict[int, List[int]]) \
+        -> Tuple[Dict[int, int], Dict[int, int], Dict[int, List[int]], Dict[int, List[int]]]:
+    document_id_by_sentence_id = {}
+    document_id_by_markable_id = {}
+    sentence_ids_by_document_id = {}
+    markable_ids_by_document_id = {}
+
+    with open(document_id_file_path, 'r') as file:
+        csv_file = DictReader(file)
+
+        for row in csv_file:
+            sentence_id = int(row['sentence_id'])
+            document_id = int(row['document_id'])
+
+            if 'document_id' not in markable_ids_by_document_id:
+                markable_ids_by_document_id[document_id] = []
+
+            if 'document_id' not in sentence_ids_by_document_id:
+                sentence_ids_by_document_id[document_id] = []
+
+            document_id_by_sentence_id[sentence_id] = document_id
+            sentence_ids_by_document_id[document_id].append(sentence_id)
+
+            for markable_id in markable_ids_by_sentence_id[sentence_id]:
+                document_id_by_markable_id[markable_id] = document_id
+                markable_ids_by_document_id[document_id].append(markable_id)
+
+    return (document_id_by_sentence_id, document_id_by_markable_id, sentence_ids_by_document_id,
+            markable_ids_by_document_id)

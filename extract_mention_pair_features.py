@@ -3,7 +3,7 @@ import logging
 from typing import List
 from xml.etree import ElementTree
 
-from utils.data_helper import get_phrases_and_nodes
+from utils.data_helper import get_phrases_and_nodes, get_sentence_variables, get_document_id_variables
 from utils.data_structures import UFDS
 from utils.feature_extractors import PairSyntacticFeatureExtractor
 from utils.training_instances_generator import TrainingInstancesGenerator, BudiInstancesGenerator, \
@@ -54,10 +54,13 @@ def extract_mention_pair_features(input_file: str, instances_generator: Training
 
 
 def main() -> None:
+    _, markable_ids_by_sentence_id = get_sentence_variables('data/full.xml')
+    _, document_id_by_markable_id, _, _ = get_document_id_variables('data/document_id.csv', markable_ids_by_sentence_id)
+
     training_instances_generators = [
         ('soon', SoonInstancesGenerator()),
         ('gilang', GilangInstancesGenerator()),
-        ('budi', BudiInstancesGenerator())
+        ('budi', BudiInstancesGenerator(document_id_by_markable_id))
     ]
 
     for name, generator in training_instances_generators:
@@ -68,7 +71,8 @@ def main() -> None:
         save_mention_pair_features(mention_pairs, 'data/training/mention_pairs_%s.csv' % name)
 
     logging.info('Extracting testing data features...')
-    mention_pairs = extract_mention_pair_features('data/testing/data.xml', BudiInstancesGenerator())
+    mention_pairs = extract_mention_pair_features('data/testing/data.xml',
+                                                  BudiInstancesGenerator(document_id_by_markable_id))
 
     logging.info('Saving testing data features...')
     save_mention_pair_features(mention_pairs, 'data/testing/mention_pairs.csv')
