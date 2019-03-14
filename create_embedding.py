@@ -1,11 +1,13 @@
+import xml.etree.ElementTree as ET
+
 import numpy as np
 from gensim.models import Word2Vec
-import xml.etree.ElementTree as ET
+
 from utils.data_helper import clean_sentence
 
 np.random.seed(26061997)
 
-word_vector = Word2Vec.load('helper_files/word2vec/id.bin')
+word_vector = Word2Vec.load('helper_files/word2vec/word2vec-dim300')
 data = ET.parse('data/full.xml')
 embedding_file_path = 'helper_files/embedding/generated_embedding.txt'
 indexed_embedding_file_path = 'helper_files/embedding/indexed_embedding.txt'
@@ -22,7 +24,6 @@ embedding_indexes_file = open(embedding_indexes_file_path, 'w')
 embedding = {}
 
 root = data.getroot()
-
 
 idx = 1
 for sentence in root:
