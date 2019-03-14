@@ -30,8 +30,12 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
 
     # should we add is in quotation?
 
-    def __init__(self, phrases: List[Element], phrase_id_by_node_id: Dict[int, int], context_words_count=10) -> None:
+    def __init__(self, phrases: List[Element], parent_map: Dict[Element, Element],
+                 document_id_by_sentence_id: Dict[int, int], phrase_id_by_node_id: Dict[int, int],
+                 context_words_count=10) -> None:
         self.phrases = phrases
+        self.parent_map = parent_map
+        self.document_id_by_sentence_id = document_id_by_sentence_id
         self.phrase_id_by_node_id = phrase_id_by_node_id
         self.context_words_count = context_words_count
 
@@ -71,7 +75,8 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
 
         previous_words = ''
 
-        while words_left > 0 and current_phrase_id >= 0:
+        while words_left > 0 and current_phrase_id >= 0 and self._get_document_id_by_phrase_id(
+                phrase_id) == self._get_document_id_by_phrase_id(current_phrase_id):
             words = self.phrases[current_phrase_id].text.split()
 
             if len(words) <= words_left:
@@ -92,7 +97,8 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
 
         next_words = ''
 
-        while words_left > 0 and current_phrase_id < len(self.phrases):
+        while words_left > 0 and current_phrase_id < len(self.phrases) and self._get_document_id_by_phrase_id(
+                phrase_id) == self._get_document_id_by_phrase_id(current_phrase_id):
             words = self.phrases[current_phrase_id].text.split()
 
             if len(words) <= words_left:
@@ -104,6 +110,9 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
                 words_left = 0
 
         return next_words
+
+    def _get_document_id_by_phrase_id(self, phrase_id: int) -> int:
+        return self.document_id_by_sentence_id[int(self.parent_map[self.phrases[phrase_id]].attrib['id'])]
 
 
 class PairSyntacticFeatureExtractor(FeatureExtractor):

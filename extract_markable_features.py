@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List
 from xml.etree import ElementTree
 
-from utils.data_helper import get_phrases_and_nodes
+from utils.data_helper import get_phrases_and_nodes, get_sentence_variables, get_document_id_variables
 from utils.data_structures import UFDS
 from utils.feature_extractors import SingleSyntacticFeatureExtractor
 
@@ -24,8 +24,12 @@ def save_markable_features(markables: List[dict], output_file: str) -> None:
 
 
 def extract_markable_features(input_file: str) -> List[dict]:
+    _, markable_ids_by_sentence_id = get_sentence_variables('data/full.xml')
+    document_id_by_sentence_id, _, _, _ = get_document_id_variables('data/document_id.csv', markable_ids_by_sentence_id)
+
     data = ElementTree.parse(input_file)
     root = data.getroot()
+    parent_map = {c: p for p in root.iter() for c in p}
 
     logging.info('Getting phrases and nodes list')
     ufds = UFDS()
@@ -34,6 +38,8 @@ def extract_markable_features(input_file: str) -> List[dict]:
 
     feature_extractor = SingleSyntacticFeatureExtractor(
         phrases=phrases,
+        document_id_by_sentence_id=document_id_by_sentence_id,
+        parent_map=parent_map,
         phrase_id_by_node_id=phrase_id_by_node_id,
         context_words_count=10
     )
