@@ -1,14 +1,16 @@
-from abc import ABC, abstractmethod
-from typing import List, Tuple
 from collections import Counter
+
+from abc import ABC, abstractmethod
+from functools import reduce
+from typing import List, Tuple
 
 
 class Scorer(ABC):
     precision: float
     recall: float
 
-    def get_scores(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> Tuple[
-        float, float, float]:
+    def get_scores(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) \
+            -> Tuple[float, float, float]:
         self._clear_memo()
 
         precision = self._compute_precision(predicted_chains, label_chains)
@@ -90,11 +92,11 @@ class B3Scorer(Scorer):
 
     def _general_compute(self, chain1: List[List[int]], chain2: List[List[int]]) -> float:
         mention_to_gold = {}
-        
+
         for c in chain2:
             for m in c:
                 mention_to_gold[m] = c
-                
+
         num, dem = 0, 0
 
         for c in chain1:
@@ -114,3 +116,34 @@ class B3Scorer(Scorer):
             dem += len(c)
 
         return num / dem
+
+
+class AverageScorer(Scorer):
+    score: float
+
+    def __init__(self, scorers: List[Scorer]):
+        self.scorers = scorers
+
+    def get_scores(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) \
+            -> Tuple[float, float, float]:
+        self.score = None
+        return super().get_scores(predicted_chains, label_chains)
+
+    def compute_precision(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
+        return self._compute_score(predicted_chains, label_chains)
+
+    def compute_recall(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
+        return self._compute_score(predicted_chains, label_chains)
+
+    def _compute_score(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
+        if self.score is not None:
+            return self.score
+        
+        if len(self.scorers) == 0:
+            self.score = 0
+            return self.score
+
+        sum_f1 = reduce(lambda prv, scorer: prv + scorer.get_scores(predicted_chains, label_chains)[2], self.scorers, 0)
+        self.score = sum_f1 / len(self.scorers)
+
+        return self.score
