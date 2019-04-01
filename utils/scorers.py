@@ -26,7 +26,10 @@ class Scorer(ABC):
     def _compute_f1(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
         precision = self._compute_precision(predicted_chains, label_chains)
         recall = self._compute_recall(predicted_chains, label_chains)
-
+        
+        if precision + recall == 0:
+            return 0
+        
         return 2 * precision * recall / (precision + recall)
 
     def _compute_precision(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
@@ -80,6 +83,9 @@ class MUCScorer(Scorer):
             nominator += (ki - (partition + part_left))
             denominator += ki - 1
 
+        if denominator == 0:
+            return 0
+        
         return nominator / denominator
 
 
@@ -114,7 +120,10 @@ class B3Scorer(Scorer):
 
             num += correct / float(len(c))
             dem += len(c)
-
+        
+        if dem == 0:
+            return 0
+        
         return num / dem
 
 
