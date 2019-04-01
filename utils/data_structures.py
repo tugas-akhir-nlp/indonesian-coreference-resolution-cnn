@@ -32,21 +32,19 @@ class UFDS:
         return self.root(x) == self.root(y)
 
     def get_chain_list(self) -> List[List[int]]:
-        chain_parents = [x for x in self.nodes if self.root(x) == x]
-
-        chain_list = [
-            [y for y in self.nodes if self.is_same(x, y)]
-            for x in chain_parents
-        ]
-
+        chain_dict = self.get_chain_dict()
+        chain_list = [chain for chain in chain_dict.values()]
         return chain_list
 
     def get_chain_dict(self) -> Dict[int, List[int]]:
-        chain_parents = [x for x in self.nodes if self.root(x) == x]
+        chain_dict = {}
 
-        chain_dict = {
-            x: [y for y in self.nodes if self.is_same(x, y)]
-            for x in chain_parents
-        }
+        for node in self.nodes:
+            root = self.root(node)
+
+            if root not in chain_dict:
+                chain_dict[root] = []
+
+            chain_dict[root].append(node)
 
         return chain_dict
