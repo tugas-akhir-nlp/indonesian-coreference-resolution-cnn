@@ -111,7 +111,7 @@ def get_entity_types(labels: List[str]) -> List[str]:
         for entity_type in label.split('|'):
             entity_types.add(entity_type)
 
-    return list(entity_types)
+    return sorted(list(entity_types))
 
 
 def entity_to_bow(entities: List[str]) -> Callable[[str], List[int]]:
