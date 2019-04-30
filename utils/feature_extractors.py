@@ -177,3 +177,48 @@ class PairSyntacticFeatureExtractor(FeatureExtractor):
 
     def get_markable_distance(self, node1: Element, node2: Element) -> int:
         return abs(int(node1.attrib['id']) - int(node2.attrib['id']))
+
+
+class BudiFeatureExtractor(PairSyntacticFeatureExtractor):
+    # Because the data is already without punctuation, Budi's isMatchNoCasePunc = is_exact_match
+
+    features = ['is_exact_match', 'is_exact_match', 'is_abbreviation', 'is_first_pronoun', 'is_second_pronoun',
+                'is_on_one_sentence', 'is_substring', 'first_name_class', 'second_name_class']
+
+    def get_is_first_pronoun(self, node1: Element, node2: Element):
+        return self._get_is_pronoun(node1)
+
+    def get_is_second_pronoun(self, node1: Element, node2: Element):
+        return self._get_is_pronoun(node2)
+
+    def get_is_on_one_sentence(self, node1: Element, node2: Element):
+        return self.get_sentence_distance(node1, node2) == 0
+
+    def get_first_name_class(self, node1: Element, node2: Element):
+        return self._get_entity_type(node1)
+
+    def get_first_name_class(self, node1: Element, node2: Element):
+        return self._get_entity_type(node2)
+
+    def _get_entity_type(self, node: Element) -> str:
+        if self._get_is_pronoun(node):
+            return 'PERSON'
+
+        included_entities = ['PERSON', 'ORGANIZATION', 'LOCATION']
+
+        for entity in included_entities:
+            if entity in node.attrib['ne']:
+                return entity
+
+        return 'UNKNOWN'
+
+    def _get_is_pronoun(self, node: Element) -> int:
+        pronouns = ['dia', 'ia', 'aku', 'saya', 'kamu', 'engkau', 'kau', 'anda', 'kami', 'kalian', 'kita', 'mereka',
+                    'beliau']
+
+        if '\\PRP' in node.text:
+            return 1
+
+        phrase = get_words_only(node.text)
+
+        return int(phrase in pronouns)
