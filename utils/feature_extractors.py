@@ -185,19 +185,19 @@ class BudiFeatureExtractor(PairSyntacticFeatureExtractor):
     features = ['is_exact_match', 'is_exact_match', 'is_abbreviation', 'is_first_pronoun', 'is_second_pronoun',
                 'is_on_one_sentence', 'is_substring', 'first_name_class', 'second_name_class']
 
-    def get_is_first_pronoun(self, node1: Element, node2: Element):
+    def get_is_first_pronoun(self, node1: Element, node2: Element) -> int:
         return self._get_is_pronoun(node1)
 
-    def get_is_second_pronoun(self, node1: Element, node2: Element):
+    def get_is_second_pronoun(self, node1: Element, node2: Element) -> int:
         return self._get_is_pronoun(node2)
 
-    def get_is_on_one_sentence(self, node1: Element, node2: Element):
-        return self.get_sentence_distance(node1, node2) == 0
+    def get_is_on_one_sentence(self, node1: Element, node2: Element) -> int:
+        return int(self.get_sentence_distance(node1, node2) == 0)
 
-    def get_first_name_class(self, node1: Element, node2: Element):
+    def get_first_name_class(self, node1: Element, node2: Element) -> str:
         return self._get_entity_type(node1)
 
-    def get_first_name_class(self, node1: Element, node2: Element):
+    def get_second_name_class(self, node1: Element, node2: Element) -> str:
         return self._get_entity_type(node2)
 
     def _get_entity_type(self, node: Element) -> str:
