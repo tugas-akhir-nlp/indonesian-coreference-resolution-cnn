@@ -6,7 +6,8 @@ from xml.etree import ElementTree
 from utils.data_helper import get_phrases_and_nodes, get_sentence_variables, get_document_id_variables
 from utils.data_structures import UFDS
 from utils.feature_extractors import PairSyntacticFeatureExtractor, BudiFeatureExtractor
-from utils.training_instances_generator import TrainingInstancesGenerator, BudiInstancesGenerator
+from utils.training_instances_generator import TrainingInstancesGenerator, BudiInstancesGenerator, \
+    SoonInstancesGenerator, GilangInstancesGenerator
 
 
 def save_mention_pair_features(mention_pairs: List[dict], output_file: str) -> None:
