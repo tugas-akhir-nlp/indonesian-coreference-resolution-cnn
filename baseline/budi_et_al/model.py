@@ -54,7 +54,7 @@ class Model:
         return self.rule_support, self.rule_confidence
 
     def save(self, path: str) -> None:
-        rule_fields = ['is_string_match', 'is_string_match_without_punctuation_match', 'is_abbreviation',
+        rule_fields = ['is_string_match', 'is_string_without_punctuation_match', 'is_abbreviation',
                        'is_first_pronoun', 'is_second_pronoun', 'is_on_one_sentence', 'is_substring',
                        'first_name_class', 'second_name_class']
 
@@ -82,7 +82,7 @@ class Model:
     def load(path: str) -> 'Model':
         model = Model()
 
-        rule_fields = ['is_string_match', 'is_string_match_without_punctuation_match', 'is_abbreviation',
+        rule_fields = ['is_string_match', 'is_string_without_punctuation_match', 'is_abbreviation',
                        'is_first_pronoun', 'is_second_pronoun', 'is_on_one_sentence', 'is_substring',
                        'first_name_class', 'second_name_class']
 

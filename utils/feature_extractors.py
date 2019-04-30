@@ -182,8 +182,15 @@ class PairSyntacticFeatureExtractor(FeatureExtractor):
 class BudiFeatureExtractor(PairSyntacticFeatureExtractor):
     # Because the data is already without punctuation, Budi's isMatchNoCasePunc = is_exact_match
 
-    features = ['is_exact_match', 'is_exact_match', 'is_abbreviation', 'is_first_pronoun', 'is_second_pronoun',
-                'is_on_one_sentence', 'is_substring', 'first_name_class', 'second_name_class']
+    features = ['is_string_match', 'is_string_without_punctuation_match', 'is_abbreviation',
+                'is_first_pronoun', 'is_second_pronoun', 'is_on_one_sentence', 'is_substring',
+                'first_name_class', 'second_name_class']
+
+    def get_is_string_match(self, node1: Element, node2: Element) -> int:
+        return self.get_is_exact_match(node1, node2)
+
+    def get_is_string_without_punctuation_match(self, node1: Element, node2: Element) -> int:
+        return self.get_is_exact_match(node1, node2)
 
     def get_is_first_pronoun(self, node1: Element, node2: Element) -> int:
         return self._get_is_pronoun(node1)
