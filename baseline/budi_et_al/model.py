@@ -1,5 +1,5 @@
 from csv import DictWriter, DictReader
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 
 from baseline.budi_et_al.rule import Rule
 
@@ -78,8 +78,8 @@ class Model:
 
                 csv_file.writerow(rule_dict)
 
-    @staticmethod
-    def load(path: str) -> 'Model':
+    @classmethod
+    def load(cls, path: str) -> 'Model':
         model = Model()
 
         rule_fields = ['is_string_match', 'is_string_without_punctuation_match', 'is_abbreviation',
@@ -90,11 +90,20 @@ class Model:
             csv_file = DictReader(f)
 
             for rule_dict in csv_file:
-                rule = Rule(**{field: rule_dict[field] for field in rule_fields})
-                model.rule_counter[rule] = (rule_dict['negative'], rule_dict['positive'])
-                model.rule_support[rule] = rule_dict['support']
-                model.rule_confidence[rule] = rule_dict['confidence']
-                model.count += rule_dict['negative'] + rule_dict['positive']
+                rule = Rule(**{field: cls._convert_field(rule_dict[field]) for field in rule_fields})
+                model.rule_counter[rule] = (int(rule_dict['negative']), int(rule_dict['positive']))
+                model.rule_support[rule] = float(rule_dict['support'])
+                model.rule_confidence[rule] = float(rule_dict['confidence'])
+                model.count += sum(model.rule_counter[rule])
 
         model.freeze = True
         return model
+
+    @classmethod
+    def _convert_field(cls, value: str) -> Any:
+        if value.isnumeric():
+            return int(value)
+        elif value.replace('.', '', 1).isnumeric():
+            return float(value)
+
+        return value

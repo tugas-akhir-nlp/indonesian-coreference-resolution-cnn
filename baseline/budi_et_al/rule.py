@@ -32,14 +32,7 @@ class Rule:
         binary_attributes = self._get_binary_attributes()
         name_class_attributes = self._get_name_class_attributes()
 
-        hash_value = 0
-        for binary_attribute in binary_attributes:
-            hash_value = hash_value * 2 + binary_attribute
-
-        for name_class_attribute in name_class_attributes:
-            hash_value = hash_value * len(self.NAME_CLASSES) + name_class_attribute
-
-        return hash_value
+        return hash((binary_attributes, name_class_attributes))
 
     def _get_binary_attributes(self) -> Tuple[int, ...]:
         return (
