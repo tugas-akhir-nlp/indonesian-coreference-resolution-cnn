@@ -59,18 +59,18 @@ def main() -> None:
     _, markable_ids_by_sentence_id = get_sentence_variables('data/full.xml')
     _, document_id_by_markable_id, _, _ = get_document_id_variables('data/document_id.csv', markable_ids_by_sentence_id)
 
-    # training_instances_generators = [
-    #     ('soon', SoonInstancesGenerator()),
-    #     ('gilang', GilangInstancesGenerator()),
-    #     ('budi', BudiInstancesGenerator(document_id_by_markable_id))
-    # ]
-    #
-    # for name, generator in training_instances_generators:
-    #     logging.info('Extracting features using %s\'s training instances generator...' % name)
-    #     mention_pairs = extract_mention_pair_features('data/training/data.xml', generator)
-    #
-    #     logging.info('Saving features using %s\'s training instances generator...' % name)
-    #     save_mention_pair_features(mention_pairs, 'data/training/mention_pairs_%s.csv' % name)
+    training_instances_generators = [
+        ('soon', SoonInstancesGenerator()),
+        ('gilang', GilangInstancesGenerator()),
+        ('budi', BudiInstancesGenerator(document_id_by_markable_id))
+    ]
+
+    for name, generator in training_instances_generators:
+        logging.info('Extracting features using %s\'s training instances generator...' % name)
+        mention_pairs = extract_mention_pair_features('data/training/data.xml', generator)
+
+        logging.info('Saving features using %s\'s training instances generator...' % name)
+        save_mention_pair_features(mention_pairs, 'data/training/mention_pairs_%s.csv' % name)
 
     logging.info('Extracting training data for Budi et al. (2006) implementation...')
     mention_pairs = extract_mention_pair_features('data/training/data.xml',
@@ -80,12 +80,12 @@ def main() -> None:
     logging.info('Saving training data for Budi et al. (2006) implementation...')
     save_mention_pair_features(mention_pairs, 'data/training/mention_pairs_for_budi_et_al_implementation.csv')
 
-    # logging.info('Extracting testing data features...')
-    # mention_pairs = extract_mention_pair_features('data/testing/data.xml',
-    #                                               BudiInstancesGenerator(document_id_by_markable_id))
-    #
-    # logging.info('Saving testing data features...')
-    # save_mention_pair_features(mention_pairs, 'data/testing/mention_pairs.csv')
+    logging.info('Extracting testing data features...')
+    mention_pairs = extract_mention_pair_features('data/testing/data.xml',
+                                                  BudiInstancesGenerator(document_id_by_markable_id))
+
+    logging.info('Saving testing data features...')
+    save_mention_pair_features(mention_pairs, 'data/testing/mention_pairs.csv')
 
     logging.info('Extracting testing data for Budi et al. (2006) implementation...')
     mention_pairs = extract_mention_pair_features('data/testing/data.xml',
