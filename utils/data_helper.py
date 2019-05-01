@@ -227,10 +227,10 @@ def get_document_id_variables(document_id_file_path: str, markable_ids_by_senten
             sentence_id = int(row['sentence_id'])
             document_id = int(row['document_id'])
 
-            if 'document_id' not in markable_ids_by_document_id:
+            if document_id not in markable_ids_by_document_id:
                 markable_ids_by_document_id[document_id] = []
 
-            if 'document_id' not in sentence_ids_by_document_id:
+            if document_id not in sentence_ids_by_document_id:
                 sentence_ids_by_document_id[document_id] = []
 
             document_id_by_sentence_id[sentence_id] = document_id
