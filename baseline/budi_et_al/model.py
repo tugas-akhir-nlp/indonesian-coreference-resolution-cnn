@@ -17,6 +17,12 @@ class Model:
 
         return int(self.rule_confidence[rule] > threshold)
 
+    def predict_proba(self, rule: Rule) -> float:
+        if rule not in self.rule_confidence:
+            return 0
+
+        return self.rule_confidence[rule]
+
     def add_rule(self, rule: Rule, is_coreference: int) -> None:
         if self.freeze:
             raise Exception('Model has been trained, rule addition is not allowed')
