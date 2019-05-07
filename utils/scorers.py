@@ -1,8 +1,7 @@
-from collections import Counter
-
 from abc import ABC, abstractmethod
+from collections import Counter
 from functools import reduce
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 
 class Scorer(ABC):
@@ -26,10 +25,10 @@ class Scorer(ABC):
     def _compute_f1(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
         precision = self._compute_precision(predicted_chains, label_chains)
         recall = self._compute_recall(predicted_chains, label_chains)
-        
+
         if precision + recall == 0:
             return 0
-        
+
         return 2 * precision * recall / (precision + recall)
 
     def _compute_precision(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
@@ -85,7 +84,7 @@ class MUCScorer(Scorer):
 
         if denominator == 0:
             return 0
-        
+
         return nominator / denominator
 
 
@@ -120,11 +119,64 @@ class B3Scorer(Scorer):
 
             num += correct / float(len(c))
             dem += len(c)
-        
+
         if dem == 0:
             return 0
-        
+
         return num / dem
+
+
+class CEAFeScorer(Scorer):
+    def compute_precision(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
+        return self._general_compute(predicted_chains, label_chains)
+
+    def compute_recall(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
+        return self._general_compute(label_chains, predicted_chains)
+    
+    def _general_compute(self, chain1: List[List[int]], chain2: List[List[int]]) -> float:
+        key_to_value: Dict[int, int] = {}
+        value_to_key: Dict[int, int] = {}
+        key_to_similar_mention: Dict[int, int] = {}
+
+        for idx_c1 in range(len(chain1)):
+            c1 = chain1[idx_c1]
+
+            max_similarity = 0
+            idx_similar = None
+
+            for idx_c2 in range(len(chain2)):
+                c2 = chain2[idx_c2]
+
+                similar_mention = 0
+
+                for m2 in c2:
+                    if m2 in c1:
+                        similar_mention += 1
+
+                if similar_mention > max_similarity:
+                    max_similarity = similar_mention
+                    idx_similar = idx_c2
+
+            if idx_similar is not None:
+                if idx_similar in key_to_value.values():
+                    if max_similarity > key_to_similar_mention[value_to_key[idx_similar]]:
+                        key_to_value.pop(value_to_key[idx_similar])
+                        key_to_similar_mention.pop(value_to_key[idx_similar])
+
+                        key_to_value[idx_c1] = idx_similar
+                        value_to_key[idx_similar] = idx_c1
+                        key_to_similar_mention[idx_c1] = max_similarity
+                else:
+                    key_to_value[idx_c1] = idx_similar
+                    value_to_key[idx_similar] = idx_c1
+                    key_to_similar_mention[idx_c1] = max_similarity
+
+        sum_similar = 0
+        for idx_key in key_to_value.keys():
+            sum_similar += 2 * key_to_similar_mention[idx_key] / (
+                    len(chain1[idx_key]) + len(chain2[key_to_value[idx_key]]))
+
+        return sum_similar / len(chain1)
 
 
 class AverageScorer(Scorer):
@@ -147,7 +199,7 @@ class AverageScorer(Scorer):
     def _compute_score(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
         if self.score is not None:
             return self.score
-        
+
         if len(self.scorers) == 0:
             self.score = 0
             return self.score
