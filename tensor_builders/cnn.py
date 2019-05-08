@@ -1,6 +1,8 @@
-from tensorflow.python.framework.ops import Tensor
-from tensorflow.keras.layers import Embedding, Dense, Concatenate, Flatten, Conv2D, MaxPool2D, Reshape
 from typing import List
+
+from tensorflow.keras.layers import Embedding, Dense, Concatenate, Flatten, Conv2D, MaxPool2D, Reshape
+from tensorflow.python.framework.ops import Tensor
+
 from .base import BaseTensorBuilder
 
 
@@ -42,7 +44,10 @@ class CNNTensorBuilder(BaseTensorBuilder):
 
             for i in range(len(self.filter_sizes))
         ]
-        tensor = Concatenate(axis=1)(max_pool_layers)
+
+        if len(self.filter_sizes) > 1:
+            tensor = Concatenate(axis=1)(max_pool_layers)
+
         tensor = Flatten()(tensor)
         tensor = Dense(self.output_size, activation='relu')(tensor)
 
