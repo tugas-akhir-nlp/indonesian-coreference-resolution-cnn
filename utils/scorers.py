@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from functools import reduce
 from typing import List, Tuple, Dict
+import numpy as np
+from sklearn.utils.linear_assignment_ import linear_assignment
 
 
 class Scorer(ABC):
@@ -127,56 +129,39 @@ class B3Scorer(Scorer):
 
 
 class CEAFeScorer(Scorer):
+    similarity: int = None
+    
+    def reset(self) -> None:
+        self.similarity = None
+        
     def compute_precision(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
-        return self._general_compute(predicted_chains, label_chains)
+        return self._compute_similarity(predicted_chains, label_chains) / len(predicted_chains)
 
     def compute_recall(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
-        return self._general_compute(label_chains, predicted_chains)
+        return self._compute_similarity(predicted_chains, label_chains) / len(label_chains)
     
-    def _general_compute(self, chain1: List[List[int]], chain2: List[List[int]]) -> float:
-        key_to_value: Dict[int, int] = {}
-        value_to_key: Dict[int, int] = {}
-        key_to_similar_mention: Dict[int, int] = {}
+    def _compute_similarity(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> int:
+        if self.similarity is not None:
+            return self.similarity
+        
+        predicted_chains = [c for c in predicted_chains if len(c) != 1]
+        label_chains = [c for c in label_chains if len(c) != 1]
+        
+        scores = np.zeros((len(label_chains), len(predicted_chains)))
+        
+        for i in range(len(label_chains)):
+            for j in range(len(predicted_chains)):
+                scores[i, j] = self._compute_phi4(label_chains[i], predicted_chains[j])
+                
+        matching = linear_assignment(-scores)
+        similarity = sum(scores[matching[:, 0], matching[:, 1]])
+        
+        self.similarity = similarity
+        return self.similarity
+    
+    def _compute_phi4(self, c1: List[List[int]], c2: List[List[int]]) -> float:
+        return 2 * len([m for m in c1 if m in c2]) / float(len(c1) + len(c2))
 
-        for idx_c1 in range(len(chain1)):
-            c1 = chain1[idx_c1]
-
-            max_similarity = 0
-            idx_similar = None
-
-            for idx_c2 in range(len(chain2)):
-                c2 = chain2[idx_c2]
-
-                similar_mention = 0
-
-                for m2 in c2:
-                    if m2 in c1:
-                        similar_mention += 1
-
-                if similar_mention > max_similarity:
-                    max_similarity = similar_mention
-                    idx_similar = idx_c2
-
-            if idx_similar is not None:
-                if idx_similar in key_to_value.values():
-                    if max_similarity > key_to_similar_mention[value_to_key[idx_similar]]:
-                        key_to_value.pop(value_to_key[idx_similar])
-                        key_to_similar_mention.pop(value_to_key[idx_similar])
-
-                        key_to_value[idx_c1] = idx_similar
-                        value_to_key[idx_similar] = idx_c1
-                        key_to_similar_mention[idx_c1] = max_similarity
-                else:
-                    key_to_value[idx_c1] = idx_similar
-                    value_to_key[idx_similar] = idx_c1
-                    key_to_similar_mention[idx_c1] = max_similarity
-
-        sum_similar = 0
-        for idx_key in key_to_value.keys():
-            sum_similar += 2 * key_to_similar_mention[idx_key] / (
-                    len(chain1[idx_key]) + len(chain2[key_to_value[idx_key]]))
-
-        return sum_similar / len(chain1)
 
 
 class AverageScorer(Scorer):
