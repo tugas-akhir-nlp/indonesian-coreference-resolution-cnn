@@ -1,6 +1,7 @@
 from collections import Counter
 from typing import List, Dict, Tuple
 
+import numpy as np
 from sklearn.utils.linear_assignment_ import linear_assignment
 
 
@@ -45,12 +46,14 @@ class PerDocumentScorer:
 
         return chains_by_document_id
 
-    def _get_markable_id_to_chain(self, chains: List[List[int]]) -> Dict[int, List[int]]:
+    def _get_markable_id_to_chain(self, chains: List[List[int]]) -> Dict[int, Tuple[int]]:
         markable_id_to_chain = {}
 
         for chain in chains:
+            chain_tuple = tuple(chain)
+
             for markable_id in chain:
-                markable_id_to_chain[markable_id] = chain
+                markable_id_to_chain[markable_id] = chain_tuple
 
         return markable_id_to_chain
 
@@ -124,7 +127,7 @@ def b_cubed(clusters, mention_to_gold):
         for m in c:
             if m in mention_to_gold:
                 gold_counts[tuple(mention_to_gold[m])] += 1
-        for c2, count in gold_counts.iteritems():
+        for c2, count in gold_counts.items():
             if len(c2) != 1:
                 correct += count * count
 
@@ -155,6 +158,7 @@ def phi4(c1, c2):
 
 def ceafe(clusters, gold_clusters):
     clusters = [c for c in clusters if len(c) != 1]
+    gold_clusters = [c for c in gold_clusters if len(c) != 1]
     scores = np.zeros((len(gold_clusters), len(clusters)))
     for i in range(len(gold_clusters)):
         for j in range(len(clusters)):
