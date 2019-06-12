@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from collections import Counter
 from functools import reduce
-from typing import List, Tuple, Dict
+from typing import List, Tuple
+
 import numpy as np
 from sklearn.utils.linear_assignment_ import linear_assignment
 
@@ -130,38 +131,37 @@ class B3Scorer(Scorer):
 
 class CEAFeScorer(Scorer):
     similarity: int = None
-    
+
     def reset(self) -> None:
         self.similarity = None
-        
+
     def compute_precision(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
         return self._compute_similarity(predicted_chains, label_chains) / len(predicted_chains)
 
     def compute_recall(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> float:
         return self._compute_similarity(predicted_chains, label_chains) / len(label_chains)
-    
+
     def _compute_similarity(self, predicted_chains: List[List[int]], label_chains: List[List[int]]) -> int:
         if self.similarity is not None:
             return self.similarity
-        
+
         predicted_chains = [c for c in predicted_chains if len(c) != 1]
         label_chains = [c for c in label_chains if len(c) != 1]
-        
+
         scores = np.zeros((len(label_chains), len(predicted_chains)))
-        
+
         for i in range(len(label_chains)):
             for j in range(len(predicted_chains)):
                 scores[i, j] = self._compute_phi4(label_chains[i], predicted_chains[j])
-                
+
         matching = linear_assignment(-scores)
         similarity = sum(scores[matching[:, 0], matching[:, 1]])
-        
+
         self.similarity = similarity
         return self.similarity
-    
+
     def _compute_phi4(self, c1: List[List[int]], c2: List[List[int]]) -> float:
         return 2 * len([m for m in c1 if m in c2]) / float(len(c1) + len(c2))
-
 
 
 class AverageScorer(Scorer):
