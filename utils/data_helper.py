@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from csv import DictReader
 from string import punctuation
-from typing import Dict, List, Tuple, Callable
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -96,10 +96,12 @@ def get_phrases_and_nodes(ufds: UFDS, root_element: ET.Element) \
             if 'id' in phrase.attrib:
                 ufds.init_id(int(phrase.attrib['id']))
                 nodes[int(phrase.attrib['id'])] = phrase
-                phrase_id_by_node_id[int(phrase.attrib['id'])] = len(phrases) - 1
+                phrase_id_by_node_id[int(phrase.attrib['id'])] = len(
+                    phrases) - 1
 
             if 'coref' in phrase.attrib:
-                ufds.join(int(phrase.attrib['id']), int(phrase.attrib['coref']))
+                ufds.join(int(phrase.attrib['id']),
+                          int(phrase.attrib['coref']))
 
     return phrases, nodes, phrase_id_by_node_id
 
@@ -145,11 +147,13 @@ def to_sequence(text: str, idx_by_word: Dict[str, int]) -> List[int]:
 def get_markable_dataframe(markable_file: str, word_vector: Dict[str, np.array],
                            idx_by_word: Dict[str, int]) -> pd.DataFrame:
     markables = pd.read_csv(markable_file)
-
+    print(get_entity_types(markables.entity_type))
     markables.text = markables.text.fillna("").map(lambda x: to_sequence(clean_sentence(str(x), word_vector),
                                                                          idx_by_word))
     markables.is_pronoun = markables.is_pronoun.map(int)
-    markables.entity_type = markables.entity_type.map(entity_to_bow(get_entity_types(markables.entity_type)))
+    # markables.entity_type = markables.entity_type.map(entity_to_bow(get_entity_types(markables.entity_type)))
+    markables.entity_type = markables.entity_type.map(entity_to_bow(
+        ['EVENT', 'FACILITY', 'LOCATION', 'NUM', 'ORGANIZATION', 'OTHER', 'PERSON', 'THINGS', 'TIME', 'TITLE']))
     markables.is_proper_name = markables.is_proper_name.map(int)
     markables.is_first_person = markables.is_first_person.map(int)
     markables.previous_words = markables.previous_words.fillna("").map(
@@ -158,7 +162,8 @@ def get_markable_dataframe(markable_file: str, word_vector: Dict[str, np.array],
     markables.next_words = markables.next_words.fillna("").map(
         lambda x: to_sequence(clean_sentence(str(x), word_vector), idx_by_word)
     )
-    markables.is_singleton = markables.is_singleton.map(lambda x: to_categorical(x, num_classes=2))
+    markables.is_singleton = markables.is_singleton.map(
+        lambda x: to_categorical(x, num_classes=2))
 
     return markables
 
@@ -198,7 +203,7 @@ def get_embedding_variables(embedding_indexes_file_path: str,
 def get_sentence_variables(data_file_path: str) -> Tuple[Dict[int, int], Dict[int, List[int]]]:
     data = ET.parse(data_file_path)
     root = data.getroot()
-    
+
     sentence_id_by_markable_id = {}
     markable_ids_by_sentence_id = {}
 
@@ -207,8 +212,10 @@ def get_sentence_variables(data_file_path: str) -> Tuple[Dict[int, int], Dict[in
 
         for phrase in sentence:
             if 'id' in phrase.attrib:
-                sentence_id_by_markable_id[int(phrase.attrib['id'])] = int(sentence.attrib['id'])
-                markable_ids_by_sentence_id[int(sentence.attrib['id'])].append(int(phrase.attrib['id']))
+                sentence_id_by_markable_id[int(phrase.attrib['id'])] = int(
+                    sentence.attrib['id'])
+                markable_ids_by_sentence_id[int(sentence.attrib['id'])].append(
+                    int(phrase.attrib['id']))
 
     return sentence_id_by_markable_id, markable_ids_by_sentence_id
 
