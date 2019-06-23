@@ -18,6 +18,9 @@ def get_anaphora_scores_by_antecedent(m1_ids: Iterable[int], m2_ids: Iterable[in
         if m1_id not in anaphora_scores_by_antecedent:
             anaphora_scores_by_antecedent[m1_id] = []
 
+        if m2_id not in anaphora_scores_by_antecedent:
+            anaphora_scores_by_antecedent[m2_id] = []
+
         if m1_id not in singletons and m2_id not in singletons:
             anaphora_scores_by_antecedent[m1_id].append((m2_id, score))
 
