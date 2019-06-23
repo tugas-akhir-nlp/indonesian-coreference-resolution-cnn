@@ -15,10 +15,10 @@ def get_anaphora_scores_by_antecedent(m1_ids: Iterable[int], m2_ids: Iterable[in
     anaphora_scores_by_antecedent = {}
 
     for m1_id, m2_id, score in zip(m1_ids, m2_ids, scores):
-        if m1_id not in anaphora_scores_by_antecedent:
+        if m1_id not in anaphora_scores_by_antecedent and m1_id not in singletons:
             anaphora_scores_by_antecedent[m1_id] = []
 
-        if m2_id not in anaphora_scores_by_antecedent:
+        if m2_id not in anaphora_scores_by_antecedent and m2_id not in singletons:
             anaphora_scores_by_antecedent[m2_id] = []
 
         if m1_id not in singletons and m2_id not in singletons:
