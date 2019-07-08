@@ -36,8 +36,8 @@ class CoreferenceClassifierModelBuilder:
         if self.use_words_feature or self.use_context_feature:
             self.cnn_tensor_builder = CNNTensorBuilder(
                 input_length=10, vocab_size=len(embedding_matrix), vector_size=len(embedding_matrix[0]),
-                embedding_matrix=embedding_matrix, filter_sizes=[2], num_filters=200, trainable_embedding=False,
-                output_size=200
+                embedding_matrix=embedding_matrix, filter_sizes=[2, 3, 4], num_filters=64, trainable_embedding=False,
+                output_size=16
             )
 
     def create_model(self, softmax: bool = True) -> Model:
@@ -67,10 +67,10 @@ class CoreferenceClassifierModelBuilder:
 
         if self.use_syntactic_feature:
             inp_m1, tensor_m1 = self.deep_tensor_builder.create_tensor(input_shape=(self.syntactic_features_num,),
-                                                                       layers=[200, 200, 200, 200, 200],
+                                                                       layers=[32, 16],
                                                                        dropout=0.2)
             inp_m2, tensor_m2 = self.deep_tensor_builder.create_tensor(input_shape=(self.syntactic_features_num,),
-                                                                       layers=[200, 200, 200, 200, 200],
+                                                                       layers=[32, 16],
                                                                        dropout=0.2)
 
             tensor = self._join_individual_tensor(tensor_m1, tensor_m2)
@@ -80,7 +80,7 @@ class CoreferenceClassifierModelBuilder:
 
         if self.use_relation_feature:
             inp, tensor = self.deep_tensor_builder.create_tensor(input_shape=(self.relation_features_num,),
-                                                                 layers=[200, 200, 200, 200, 200],
+                                                                 layers=[32, 16],
                                                                  dropout=0.2)
 
             inputs.append(inp)
@@ -93,8 +93,7 @@ class CoreferenceClassifierModelBuilder:
         else:
             raise Exception('Should have features')
 
-        _, tensor = self.deep_tensor_builder.create_tensor(layers=[200, 200, 200, 200, 200], dropout=0.2,
-                                                           input_tensor=tensor)
+        _, tensor = self.deep_tensor_builder.create_tensor(layers=[32, 8], dropout=0.2, input_tensor=tensor)
 
         if softmax:
             tensor = Dense(2, activation='softmax')(tensor)
@@ -112,7 +111,6 @@ class CoreferenceClassifierModelBuilder:
 
     def _join_individual_tensor(self, m1_tensor: Tensor, m2_tensor: Tensor):
         tensor = Concatenate()([m1_tensor, m2_tensor])
-        _, tensor = self.deep_tensor_builder.create_tensor(layers=[200, 200, 200, 200, 200], dropout=0.2,
-                                                           input_tensor=tensor)
+        _, tensor = self.deep_tensor_builder.create_tensor(layers=[64, 32, 16], dropout=0.2, input_tensor=tensor)
 
         return tensor

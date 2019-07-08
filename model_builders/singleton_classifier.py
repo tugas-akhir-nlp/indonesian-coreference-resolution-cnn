@@ -29,8 +29,8 @@ class SingletonClassifierModelBuilder:
         if self.use_words_feature or self.use_context_feature:
             self.cnn_tensor_builder = CNNTensorBuilder(
                 input_length=10, vocab_size=len(embedding_matrix), vector_size=len(embedding_matrix[0]),
-                embedding_matrix=embedding_matrix, filter_sizes=[2], num_filters=200, trainable_embedding=False,
-                output_size=200
+                embedding_matrix=embedding_matrix, filter_sizes=[2, 3, 4], num_filters=64, trainable_embedding=False,
+                output_size=16
             )
 
     def create_model(self, softmax: bool = True) -> Model:
@@ -51,7 +51,7 @@ class SingletonClassifierModelBuilder:
 
         if self.use_syntactic_feature:
             inp, tensor = self.deep_tensor_builder.create_tensor(input_shape=(self.syntactic_features_num,),
-                                                                 layers=[200, 200, 200, 200, 200],
+                                                                 layers=[32, 16],
                                                                  dropout=0.2)
             inputs.append(inp)
             tensors.append(tensor)
@@ -63,8 +63,7 @@ class SingletonClassifierModelBuilder:
         else:
             raise Exception('Should have features')
 
-        _, tensor = self.deep_tensor_builder.create_tensor(layers=[200, 200, 200, 200, 200], dropout=0.2,
-                                                           input_tensor=tensor)
+        _, tensor = self.deep_tensor_builder.create_tensor(layers=[32, 8], dropout=0.2, input_tensor=tensor)
 
         if softmax:
             tensor = Dense(2, activation='softmax')(tensor)
