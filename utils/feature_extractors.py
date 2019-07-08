@@ -26,7 +26,7 @@ class FeatureExtractor:
 
 class SingleSyntacticFeatureExtractor(FeatureExtractor):
     features = ['is_pronoun', 'entity_type', 'is_proper_name', 'is_first_person', 'previous_words',
-                'next_words']
+                'next_words', 'all_previous_words']
 
     # should we add is in quotation?
 
@@ -110,6 +110,19 @@ class SingleSyntacticFeatureExtractor(FeatureExtractor):
                 words_left = 0
 
         return next_words
+
+    def get_all_previous_words(self, node: Element) -> str:
+        phrase_id = self.phrase_id_by_node_id[int(node.attrib['id'])]
+        current_phrase_id = phrase_id - 1
+        all_previous_words = ''
+
+        while current_phrase_id >= 0 and self._get_document_id_by_phrase_id(
+                phrase_id) == self._get_document_id_by_phrase_id(current_phrase_id):
+            words = self.phrases[current_phrase_id].text.split()
+            all_previous_words = ' '.join(words) + ' ' + all_previous_words
+            current_phrase_id -= 1
+
+        return all_previous_words
 
     def _get_document_id_by_phrase_id(self, phrase_id: int) -> int:
         return self.document_id_by_sentence_id[int(self.parent_map[self.phrases[phrase_id]].attrib['id'])]

@@ -162,6 +162,9 @@ def get_markable_dataframe(markable_file: str, word_vector: Dict[str, np.array],
     markables.next_words = markables.next_words.fillna("").map(
         lambda x: to_sequence(clean_sentence(str(x), word_vector), idx_by_word)
     )
+    markables.all_previous_words = markables.all_previous_words.fillna("").map(
+        lambda x: to_sequence(clean_sentence(str(x), word_vector), idx_by_word)
+    )
     markables.is_singleton = markables.is_singleton.map(
         lambda x: to_categorical(x, num_classes=2))
 
