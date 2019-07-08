@@ -14,6 +14,11 @@ def is_singleton(ufds: UFDS, chain_dict: Dict[int, List[int]], node: int) -> int
     return int(len(chain_dict[par]) == 1)
 
 
+def is_antecedentless(ufds: UFDS, chain_dict: Dict[int, List[int]], node: int) -> int:
+    par = ufds.root(node)
+    return int(min(chain_dict[par]) == node)
+
+
 def save_markable_features(markables: List[dict], output_file: str) -> None:
     if len(markables) == 0:
         return
@@ -49,7 +54,8 @@ def extract_markable_features(input_file: str, document_id_by_sentence_id: Dict[
             'id': node.attrib['id'],
             'text': node.text,
             **feature_extractor.get_features(node),
-            'is_singleton': is_singleton(ufds, chain_dict, int(node.attrib['id']))
+            'is_singleton': is_singleton(ufds, chain_dict, int(node.attrib['id'])),
+            'is_antecedentless': is_antecedentless(ufds, chain_dict, int(node.attrib['id']))
         }
         for node in nodes.values()
     ]

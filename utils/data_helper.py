@@ -167,6 +167,8 @@ def get_markable_dataframe(markable_file: str, word_vector: Dict[str, np.array],
     )
     markables.is_singleton = markables.is_singleton.map(
         lambda x: to_categorical(x, num_classes=2))
+    markables.is_antecedentless = markables.is_antecedentless.map(
+        lambda x: to_categorical(x, num_classes=2))
 
     return markables
 
