@@ -8,7 +8,7 @@ from tensor_builders.deep import DeepTensorBuilder
 from tensor_builders.lstm import LSTMTensorBuilder
 
 
-class SingletonClassifierModelBuilder:
+class AntecedentlessClassifierModelBuilder:
     def __init__(self, use_words_feature: bool = True, use_context_feature: bool = True,
                  use_syntactic_feature: bool = True, syntactic_features_num: int = None,
                  embedding_matrix: List[List[int]] = None) -> None:
@@ -36,9 +36,8 @@ class SingletonClassifierModelBuilder:
 
         if self.use_context_feature:
             self.lstm_tensor_builder = LSTMTensorBuilder(
-                input_length=10, vocab_size=len(embedding_matrix), vector_size=len(embedding_matrix[0]),
-                embedding_matrix=embedding_matrix, filter_sizes=[2, 3, 4], num_filters=64, trainable_embedding=False,
-                output_size=16
+                vocab_size=len(embedding_matrix), vector_size=len(embedding_matrix[0]),
+                embedding_matrix=embedding_matrix, trainable_embedding=False, output_size=16
             )
 
     def create_model(self, softmax: bool = True) -> Model:
